@@ -27,6 +27,7 @@ namespace S10269029_PRG2Assignment
                     Console.WriteLine("Error: One or more CSV files are missing. Ensure all required files are in the directory.");
                     return;
                 }
+
                 // Load airlines
                 Console.WriteLine("Loading Airlines...");
                 airlines = LoadAirlines(airlinesFilePath);
@@ -42,6 +43,10 @@ namespace S10269029_PRG2Assignment
                 flights = LoadFlightsFromFile(flightsFilePath);
                 Console.WriteLine($"{flights.Count} Flights Loaded!");
 
+                // Pause to allow visibility before clearing the screen
+                Console.WriteLine("\nPress any key to continue to the menu...");
+                Console.ReadKey();
+
                 // Assign flights to airlines and gates
                 AssignFlightsToAirlinesAndGates(flights, airlines, boardingGates);
             }
@@ -53,7 +58,7 @@ namespace S10269029_PRG2Assignment
             // Menu loop
             while (true)
             {
-                Console.Clear();
+                Console.Clear(); // Clear AFTER allowing user to see the previous output
                 Console.WriteLine("=============================================");
                 Console.WriteLine("Welcome to Changi Airport Terminal 5");
                 Console.WriteLine("=============================================");
@@ -74,11 +79,9 @@ namespace S10269029_PRG2Assignment
                     switch (option)
                     {
                         case "1":
-                            // Feature: List all flights
                             ListAllFlights(flights);
                             break;
                         case "2":
-                            // Feature: List all boarding gates
                             ListAllBoardingGates(boardingGates);
                             break;
                         case "3":
@@ -88,11 +91,9 @@ namespace S10269029_PRG2Assignment
                             CreateNewFlight();
                             break;
                         case "5":
-                            // Feature: Display full flight details from an airline
                             DisplayFullFlightDetailsFromAirline(airlines, boardingGates);
                             break;
                         case "6":
-                            // Feature: Modify flight details
                             ModifyFlightDetails(airlines);
                             break;
                         case "7":
@@ -120,47 +121,77 @@ namespace S10269029_PRG2Assignment
         static Dictionary<string, Airline> LoadAirlines(string filePath)
         {
             var airlineDictionary = new Dictionary<string, Airline>();
-            using (StreamReader reader = new StreamReader(filePath))
+
+            try
             {
-                string line;
-                reader.ReadLine(); // Skip header line
-                while ((line = reader.ReadLine()) != null)
+                using (StreamReader reader = new StreamReader(filePath))
                 {
-                    var parts = line.Split(',');
-                    if (parts.Length >= 2)
+                    string line;
+                    reader.ReadLine(); // Skip header line
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        var airline = new Airline(parts[0].Trim(), parts[1].Trim()); // Name, Code
-                        airlineDictionary[airline.Code] = airline;
+                        var parts = line.Split(',');
+                        if (parts.Length >= 2)
+                        {
+                            var airline = new Airline(parts[0].Trim(), parts[1].Trim()); // Name, Code
+                            airlineDictionary[airline.Code] = airline;
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading airlines: {ex.Message}");
+            }
+
             return airlineDictionary;
         }
 
+
+        // Load BoardingGate
         static List<BoardingGate> LoadBoardingGates(string filePath)
         {
             var boardingGates = new List<BoardingGate>();
-            using (StreamReader reader = new StreamReader(filePath))
+
+            try
             {
-                string line;
-                reader.ReadLine(); // Skip header line
-                while ((line = reader.ReadLine()) != null)
+                using (StreamReader reader = new StreamReader(filePath))
                 {
-                    var parts = line.Split(',');
-                    if (parts.Length >= 4)
+                    string line;
+                    reader.ReadLine(); // Skip header line
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        var gate = new BoardingGate(
-                            parts[0].Trim(),                  // GateName
-                            bool.Parse(parts[1].Trim()),     // SupportsDDJB
-                            bool.Parse(parts[2].Trim()),     // SupportsCFFT
-                            bool.Parse(parts[3].Trim())      // SupportsLWTT
-                        );
-                        boardingGates.Add(gate);
+                        var parts = line.Split(',');
+
+                        if (parts.Length >= 4)
+                        {
+                            try
+                            {
+                                var gate = new BoardingGate(
+                                    parts[0].Trim(), // Gate Name
+                                    bool.TryParse(parts[1].Trim(), out bool supportsDDJB) ? supportsDDJB : false,
+                                    bool.TryParse(parts[2].Trim(), out bool supportsCFFT) ? supportsCFFT : false,
+                                    bool.TryParse(parts[3].Trim(), out bool supportsLWTT) ? supportsLWTT : false
+                                );
+                                boardingGates.Add(gate);
+                            }
+                            catch (Exception innerEx)
+                            {
+                                Console.WriteLine($"Skipping invalid data in boarding gates file: {innerEx.Message}");
+                            }
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading boarding gates: {ex.Message}");
+            }
             return boardingGates;
         }
+
+
+
 
         // Feature 2: Load flights
         static Dictionary<string, Flight> LoadFlightsFromFile(string filePath)
