@@ -1,4 +1,12 @@
-﻿using S10269029_PRG2Assignment;
+﻿
+//==========================================================
+// Student Number	: S10269029D
+// Student Name	: Koh Rui Qi Rachael
+// Partner Name	: Puteri Mayangsari Binte Abdul Haafiz
+//==========================================================
+
+
+using S10269029_PRG2Assignment;
 
 public class BoardingGate
 {

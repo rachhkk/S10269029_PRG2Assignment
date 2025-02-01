@@ -4,6 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+//==========================================================
+// Student Number	: S10269029D
+// Student Name	: Koh Rui Qi Rachael
+// Partner Name	: Puteri Mayangsari Binte Abdul Haafiz
+//==========================================================
+
 namespace S10269029_PRG2Assignment
 {
     public class Flight : IComparable<Flight>
@@ -47,3 +53,15 @@ namespace S10269029_PRG2Assignment
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
