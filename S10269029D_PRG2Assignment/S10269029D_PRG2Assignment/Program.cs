@@ -85,7 +85,7 @@ namespace S10269029_PRG2Assignment
                             AssignBoardingGateToFlight(flights, boardingGates);
                             break;
                         case "4":
-                            Console.WriteLine("Feature coming soon.");
+                            CreateNewFlight();
                             break;
                         case "5":
                             // Feature: Display full flight details from an airline
@@ -96,7 +96,7 @@ namespace S10269029_PRG2Assignment
                             ModifyFlightDetails(airlines);
                             break;
                         case "7":
-                            Console.WriteLine("Feature coming soon.");
+                            DisplayScheduledFlights(flights);
                             break;
                         case "0":
                             Console.WriteLine("Exiting... Goodbye!");
