@@ -3,6 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+
+//==========================================================
+// Student Number	: S10269029D
+// Student Name	: Koh Rui Qi Rachael
+// Partner Name	: Puteri Mayangsari Binte Abdul Haafiz
+//==========================================================
+
+
 namespace S10269029_PRG2Assignment
 {
     class Program
@@ -69,6 +77,7 @@ namespace S10269029_PRG2Assignment
                 Console.WriteLine("5. Display Airline Flights");
                 Console.WriteLine("6. Modify Flight Details");
                 Console.WriteLine("7. Display Flight Schedule");
+                Console.WriteLine("8. Process Unassigned Flights");
                 Console.WriteLine("0. Exit");
                 Console.WriteLine();
                 Console.Write("Please select your option: ");
@@ -99,12 +108,16 @@ namespace S10269029_PRG2Assignment
                         case "7":
                             DisplayScheduledFlights(flights);
                             break;
+                        case "8":
+                            ProcessUnassignedFlights(flights, boardingGates);
+                            break;
                         case "0":
                             Console.WriteLine("Exiting... Goodbye!");
                             return;
                         default:
                             Console.WriteLine("Invalid option! Please try again.");
                             break;
+                       
                     }
                 }
                 catch (Exception ex)
@@ -733,7 +746,98 @@ namespace S10269029_PRG2Assignment
             }
         }
 
-        // Advanced Features
+        // Advanced Features : Part (a)
 
+        // Process all unassigned flights to boarding gates in bulk
+        static void ProcessUnassignedFlights(Dictionary<string, Flight> flights, List<BoardingGate> boardingGates)
+        {
+            Queue<Flight> flightQueue = new Queue<Flight>();
+
+            // Step 1: Identify Flights without a Boarding Gate assigned
+            foreach (var flight in flights.Values)
+            {
+                if (string.IsNullOrEmpty(flight.BoardingGate)) // Flight has no assigned gate
+                {
+                    flightQueue.Enqueue(flight);
+                }
+            }
+
+            Console.WriteLine("\n===============================================");
+            Console.WriteLine($"Total Flights without a Boarding Gate: {flightQueue.Count}");
+
+            // Step 2: Identify Boarding Gates that do not have a Flight assigned
+            List<BoardingGate> unassignedGates = boardingGates.Where(g => g.Flight == null).ToList();
+            Console.WriteLine($"Total Boarding Gates without an assigned Flight: {unassignedGates.Count}");
+            Console.WriteLine("===============================================");
+
+            int flightsAssigned = 0;
+            int gatesAssigned = 0;
+
+            // Step 3: Process each Flight in the queue
+            while (flightQueue.Count > 0 && unassignedGates.Count > 0)
+            {
+                Flight currentFlight = flightQueue.Dequeue(); // Dequeue first flight
+
+                // Step 4: Check if Flight has a Special Request Code
+                BoardingGate assignedGate = null;
+                bool hasSpecialRequest = !string.IsNullOrEmpty(currentFlight.SpecialRequestCode);
+
+                if (hasSpecialRequest)
+                {
+                    // Step 5: Try to find a gate that matches the Special Request Code
+                    assignedGate = unassignedGates.FirstOrDefault(g =>
+                        (currentFlight.SpecialRequestCode == "CFFT" && g.SupportsCFFT) ||
+                        (currentFlight.SpecialRequestCode == "DDJB" && g.SupportsDDJB) ||
+                        (currentFlight.SpecialRequestCode == "LWTT" && g.SupportsLWTT));
+                }
+
+                // Step 6: If no matching gate is found or no special request exists, assign a general gate
+                if (assignedGate == null)
+                {
+                    assignedGate = unassignedGates.FirstOrDefault(g => g.Flight == null);
+                }
+
+                // Step 7: Assign the Boarding Gate to the Flight Number
+                if (assignedGate != null)
+                {
+                    assignedGate.Flight = currentFlight;
+                    currentFlight.BoardingGate = assignedGate.GateName;
+                    unassignedGates.Remove(assignedGate);
+                    flightsAssigned++;
+                    gatesAssigned++;
+
+                    // Step 8: Display the Flight details with Basic Information
+                    Console.WriteLine("\n-----------------------------------------------");
+                    Console.WriteLine($"Assigned Flight {currentFlight.FlightNumber} to Gate {assignedGate.GateName}");
+                    Console.WriteLine("Flight Details:");
+                    Console.WriteLine($"Flight Number: {currentFlight.FlightNumber}");
+                    Console.WriteLine($"Origin: {currentFlight.Origin}");
+                    Console.WriteLine($"Destination: {currentFlight.Destination}");
+                    Console.WriteLine($"Expected Time: {currentFlight.ExpectedTime:yyyy-MM-dd HH:mm}");
+                    Console.WriteLine($"Status: {currentFlight.Status}");
+                    Console.WriteLine($"Special Request Code: {(hasSpecialRequest ? currentFlight.SpecialRequestCode : "N/A")}");
+                    Console.WriteLine($"Boarding Gate: {currentFlight.BoardingGate}");
+                    Console.WriteLine("-----------------------------------------------");
+                }
+            }
+
+            // Step 9: Display the final summary of assignments
+            Console.WriteLine("\n===============================================");
+            Console.WriteLine($"Total Flights Assigned: {flightsAssigned}");
+            Console.WriteLine($"Total Boarding Gates Assigned: {gatesAssigned}");
+
+            int totalProcessed = flightsAssigned + gatesAssigned;
+            double autoProcessingPercentage = totalProcessed > 0
+                ? (totalProcessed / (double)(flights.Count + boardingGates.Count)) * 100
+                : 0;
+
+            Console.WriteLine($"Total Flights and Gates Processed: {totalProcessed}");
+            Console.WriteLine($"Percentage of Automatic Assignments: {autoProcessingPercentage:F2}%");
+            Console.WriteLine("===============================================");
+        }
+
+
+        // Advanced Feature: Part (b)
     }
 }
+
