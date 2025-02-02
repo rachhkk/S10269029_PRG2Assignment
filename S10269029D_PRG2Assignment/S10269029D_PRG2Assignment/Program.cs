@@ -884,7 +884,11 @@ namespace S10269029_PRG2Assignment
                     double flightFee = 0;
 
                     // Apply Origin/Destination Fee (if origin or destination is Singapore)
-                    double originDestinationFee = (flight.Origin == "SIN" || flight.Destination == "SIN") ? 800 : 500;
+                    double originDestinationFee = 0;
+                    if (flight.Origin == "SIN")
+                        originDestinationFee += 800;  // Departing from Singapore
+                    if (flight.Destination == "SIN")
+                        originDestinationFee += 500;  // Arriving to Singapore
                     flightFee += originDestinationFee;
 
                     // Apply Special Request Fee (based on special request codes)
@@ -894,13 +898,13 @@ namespace S10269029_PRG2Assignment
                         switch (flight.SpecialRequestCode)
                         {
                             case "CFFT":
-                                specialRequestFee = 100;  // Example fee for CFFT
+                                specialRequestFee = 150;  // Example fee for CFFT
                                 break;
                             case "DDJB":
-                                specialRequestFee = 150;  // Example fee for DDJB
+                                specialRequestFee = 300;  // Example fee for DDJB
                                 break;
                             case "LWTT":
-                                specialRequestFee = 200;  // Example fee for LWTT
+                                specialRequestFee = 500;  // Example fee for LWTT
                                 break;
                             default:
                                 specialRequestFee = 0;
@@ -914,9 +918,10 @@ namespace S10269029_PRG2Assignment
 
                     // Compute Subtotal Fee for the flight
                     double flightDiscount = 0;
-                    if (flight.Origin == "SIN" && flight.Destination == "SIN") // Example Promotional Condition (e.g., a discount for certain flights)
+                    // Example Promotional Condition: Discount for flights departing or arriving before 11am or after 9pm
+                    if (flight.ExpectedTime.Hour < 11 || flight.ExpectedTime.Hour >= 21)
                     {
-                        flightDiscount = 100;  // Example discount for flights departing and arriving at Singapore
+                        flightDiscount = 110;  // Discount for flights before 11am or after 9pm
                     }
 
                     // Calculate total fees and discounts
