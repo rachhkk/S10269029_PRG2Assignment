@@ -78,6 +78,7 @@ namespace S10269029_PRG2Assignment
                 Console.WriteLine("6. Modify Flight Details");
                 Console.WriteLine("7. Display Flight Schedule");
                 Console.WriteLine("8. Process Unassigned Flights");
+                Console.WriteLine("9. Display the total fee per airline for the day");
                 Console.WriteLine("0. Exit");
                 Console.WriteLine();
                 Console.Write("Please select your option: ");
@@ -110,6 +111,9 @@ namespace S10269029_PRG2Assignment
                             break;
                         case "8":
                             ProcessUnassignedFlights(flights, boardingGates);
+                            break;
+                        case "9":
+                            DisplayTotalFeePerAirline(airlines, boardingGates);
                             break;
                         case "0":
                             Console.WriteLine("Exiting... Goodbye!");
@@ -839,6 +843,125 @@ namespace S10269029_PRG2Assignment
 
 
         // Advanced Feature: Part (b)
+        // Feature 10: Display the total fee per airline for the day
+        static void DisplayTotalFeePerAirline(Dictionary<string, Airline> airlines, List<BoardingGate> boardingGates)
+        {
+            // Step 1: Check if all flights have boarding gates assigned
+            bool allFlightsAssigned = true;
+            foreach (var airline in airlines.Values)
+            {
+                foreach (var flight in airline.Flights.Values)
+                {
+                    if (string.IsNullOrEmpty(flight.BoardingGate)) // Flight has no assigned gate
+                    {
+                        allFlightsAssigned = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!allFlightsAssigned)
+            {
+                Console.WriteLine("Error: Some flights have not been assigned Boarding Gates. Please assign all boarding gates before running this feature.");
+                return;
+            }
+
+            // Step 2: Display fees for each airline
+            double totalFees = 0;
+            double totalDiscounts = 0;
+
+            foreach (var airline in airlines.Values)
+            {
+                Console.WriteLine($"\n===============================================");
+                Console.WriteLine($"Fees for Airline: {airline.Name}");
+                Console.WriteLine($"===============================================");
+                double airlineFeeSubtotal = 0;
+                double airlineDiscountSubtotal = 0;
+
+                // Step 3: Loop through each flight in the airline
+                foreach (var flight in airline.Flights.Values)
+                {
+                    double flightFee = 0;
+
+                    // Apply Origin/Destination Fee (if origin or destination is Singapore)
+                    double originDestinationFee = (flight.Origin == "SIN" || flight.Destination == "SIN") ? 800 : 500;
+                    flightFee += originDestinationFee;
+
+                    // Apply Special Request Fee (based on special request codes)
+                    double specialRequestFee = 0;
+                    if (!string.IsNullOrEmpty(flight.SpecialRequestCode))
+                    {
+                        switch (flight.SpecialRequestCode)
+                        {
+                            case "CFFT":
+                                specialRequestFee = 100;  // Example fee for CFFT
+                                break;
+                            case "DDJB":
+                                specialRequestFee = 150;  // Example fee for DDJB
+                                break;
+                            case "LWTT":
+                                specialRequestFee = 200;  // Example fee for LWTT
+                                break;
+                            default:
+                                specialRequestFee = 0;
+                                break;
+                        }
+                    }
+                    flightFee += specialRequestFee;
+
+                    // Apply Boarding Gate Fee (base fee)
+                    flightFee += 300;  // Boarding Gate Base Fee
+
+                    // Compute Subtotal Fee for the flight
+                    double flightDiscount = 0;
+                    if (flight.Origin == "SIN" && flight.Destination == "SIN") // Example Promotional Condition (e.g., a discount for certain flights)
+                    {
+                        flightDiscount = 100;  // Example discount for flights departing and arriving at Singapore
+                    }
+
+                    // Calculate total fees and discounts
+                    airlineFeeSubtotal += flightFee;
+                    airlineDiscountSubtotal += flightDiscount;
+
+                    // Display Flight Fee Breakdown
+                    Console.WriteLine($"\nFlight Number: {flight.FlightNumber}");
+                    Console.WriteLine($"   Origin: {flight.Origin}, Destination: {flight.Destination}");
+                    Console.WriteLine($"   Special Request: {flight.SpecialRequestCode ?? "None"}");
+                    Console.WriteLine($"   Boarding Gate Fee: $300");
+                    Console.WriteLine($"   Origin/Destination Fee: ${originDestinationFee}");
+                    Console.WriteLine($"   Special Request Fee: ${specialRequestFee}");
+                    Console.WriteLine($"   Subtotal for Flight {flight.FlightNumber}: ${flightFee - flightDiscount}");
+                    Console.WriteLine($"   Discount Applied: ${flightDiscount}");
+                    Console.WriteLine("-----------------------------------------------");
+                }
+
+                // Step 4: Display Airline Fee Summary
+                double totalAirlineFees = airlineFeeSubtotal - airlineDiscountSubtotal;
+                Console.WriteLine($"\nTotal Fees for Airline {airline.Name}: ${airlineFeeSubtotal}");
+                Console.WriteLine($"Total Discounts for Airline {airline.Name}: ${airlineDiscountSubtotal}");
+                Console.WriteLine($"Final Total Fees for Airline {airline.Name}: ${totalAirlineFees}");
+                totalFees += totalAirlineFees;
+                totalDiscounts += airlineDiscountSubtotal;
+
+                Console.WriteLine("===============================================");
+            }
+
+            // Step 5: Display Final Summary for all Airlines
+            double grandTotalFees = totalFees - totalDiscounts;
+            double discountPercentage = totalFees > 0 ? (totalDiscounts / totalFees) * 100 : 0;
+
+            Console.WriteLine("\n===============================================");
+            Console.WriteLine("Final Summary of Airline Fees for the Day");
+            Console.WriteLine("===============================================");
+            Console.WriteLine($"Total Fees from all Airlines: ${totalFees}");
+            Console.WriteLine($"Total Discounts from all Airlines: ${totalDiscounts}");
+            Console.WriteLine($"Final Total Fees (after discounts): ${grandTotalFees}");
+            Console.WriteLine($"Total Discount Percentage: {discountPercentage:F2}%");
+            Console.WriteLine("===============================================");
+        }
+
     }
+
 }
+
 
